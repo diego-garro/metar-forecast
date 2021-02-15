@@ -145,6 +145,17 @@ requirements_deprecated_finder = ["pipreqs", "pip-api"]
 colors = ["colorama (>=0.4.3,<0.5.0)"]
 
 [[package]]
+name = "metar"
+version = "1.8.0"
+description = "Metar - a package to parse METAR-coded weather reports"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.extras]
+test = ["pytest"]
+
+[[package]]
 name = "mypy-extensions"
 version = "0.4.3"
 description = "Experimental type system extensions for programs checked with the mypy typechecker."
@@ -325,7 +336,7 @@ testing = ["pytest (>=3.5,!=3.7.3)", "pytest-checkdocs (>=1.2.3)", "pytest-flake
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.6"
-content-hash = "44e28189cd15538e6a6dfdb7157c4223528e2331c271d7d7e1f1c239fd96c728"
+content-hash = "9d4a600c075ad6cb27e73bc8d1d9dfbc6eb9139ee6567e4151617ed0fae7b5d4"
 
 [metadata.files]
 appdirs = [
@@ -382,6 +393,9 @@ iniconfig = [
 isort = [
     {file = "isort-5.7.0-py3-none-any.whl", hash = "sha256:fff4f0c04e1825522ce6949973e83110a6e907750cd92d128b0d14aaaadbffdc"},
     {file = "isort-5.7.0.tar.gz", hash = "sha256:c729845434366216d320e936b8ad6f9d681aab72dc7cbc2d51bedc3582f3ad1e"},
+]
+metar = [
+    {file = "metar-1.8.0.tar.gz", hash = "sha256:d23494c5dcb81a857de9f4022cab0cf3d37277a32f675a9e1491e817d56f8428"},
 ]
 mypy-extensions = [
     {file = "mypy_extensions-0.4.3-py2.py3-none-any.whl", hash = "sha256:090fedd75945a69ae91ce1303b5824f428daf5a028d2f6ab8a299250a846f15d"},

@@ -9,6 +9,7 @@ license = "MIT"
 python = "^3.6"
 requests = "^2.25.1"
 click = "^7.1.2"
+metar = "^1.8.0"
 
 [tool.poetry.dev-dependencies]
 bump2version = "^1.0.1"
