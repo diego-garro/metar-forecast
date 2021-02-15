@@ -25,7 +25,7 @@ jobs:
         run: |
           source $HOME/.poetry/env
           poetry --version
-          poetry Install
+          poetry install
       
       - name: Lint
         run: |
