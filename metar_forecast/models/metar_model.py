@@ -1,4 +1,5 @@
 from datetime import datetime
+
 from metar import Metar as METAR
 
 
@@ -9,9 +10,22 @@ class Metar(METAR.Metar):
     def __init__(self, date: datetime, code: str) -> None:
         super().__init__(code, month=date.month, year=date.year)
         self.cavok = 1
+        self._verify_cavok()
         if code.count("NIL") > 0:
             self.time = date
             self.cavok = Metar.null
+
+    def _verify_cavok(self):
+        if self.vis.value() < 10000.0:
+            self.cavok = 0
+
+        if len(self.weather) > 0:
+            self.cavok = 0
+
+        if len(self.sky) > 0:
+            height = self.sky[0][1].value()
+            if height < 6000.0:
+                self.cavok = 0
 
     def get_wind_dir(self):
         if self.wind_dir is None:
@@ -36,7 +50,6 @@ class Metar(METAR.Metar):
     def get_weather(self, weather_code: str) -> int:
         for weather in self.weather:
             if weather_code in weather:
-                self.cavok = 0
                 return 1
         return 0
 
@@ -67,8 +80,6 @@ class Metar(METAR.Metar):
             sky_conditions[index][1] = layer[1].value()
             sky_conditions[index][2] = Metar.null if layer[2] is None else layer[2]
 
-            if layer[1] is not None and layer[1].value() < 6000.0:
-                self.cavok = 0
         return sky_conditions
 
     def _return_value_else_null(self, var):
@@ -102,7 +113,7 @@ class Metar(METAR.Metar):
             else:
                 return Metar.null
 
-    def _return_temperature_else_null(self, type="absolute"):
+    def get_temperature(self, type="absolute"):
         """Returns the absolute or dewpoint temperature or null.
 
         Args:
@@ -111,14 +122,14 @@ class Metar(METAR.Metar):
         """
 
         if type == "absolute":
-            return self.temp if self.temp is not None else Metar.null
+            return self.temp.value() if self.temp is not None else Metar.null
         elif type == "dewpoint":
-            return self.dewpt if self.dewpt is not None else Metar.null
+            return self.dewpt.value() if self.dewpt is not None else Metar.null
         else:
             return Metar.null
 
-    def _return_pressure_else_null(self):
-        return self.press if self.press is not None else Metar.null
+    def get_pressure(self):
+        return self.press.value() if self.press is not None else Metar.null
 
     def to_dict(self):
         d = {
@@ -158,8 +169,8 @@ class Metar(METAR.Metar):
                 3, parameter="height"
             ),
             "sky_layer4_cloud": self._return_sky_layer_else_null(3, parameter="cloud"),
-            "temperature": self._return_temperature_else_null(),
-            "dewpoint": self._return_temperature_else_null(type="dewpoint"),
-            "pressure": self._return_pressure_else_null(),
+            "temperature": self.get_temperature(),
+            "dewpoint": self.get_temperature(type="dewpoint"),
+            "pressure": self.get_pressure(),
             "code": self.code.strip(),
         }

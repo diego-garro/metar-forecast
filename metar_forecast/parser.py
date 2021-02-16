@@ -29,9 +29,9 @@ def parse_metars_from_file(station: str, start_year=2005, end_year=today.year):
             try:
                 metar = Metar(metar_date, metar_code)
             except Exception as error:
-                console.print(f"\n\n{lines[n]}", style='info')
-                console.print("Parser error: ", end="", style='danger')
-                console.print(f"{error}", style='warning')
+                console.print(f"\n\n{lines[n]}", style="info")
+                console.print("Parser error: ", end="", style="danger")
+                console.print(f"{error}", style="warning")
                 error = 1
                 exit()
             yield metar
