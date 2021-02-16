@@ -1,9 +1,8 @@
 from datetime import datetime
+from metar import Metar as METAR
 
-import metar
 
-
-class Metar(metar.Metar.Metar):
+class Metar(METAR.Metar):
 
     null: str = "null"
 
