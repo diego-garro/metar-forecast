@@ -6,7 +6,7 @@ from rich.progress import track
 from .models.console import console
 from .models.metar_model import Metar
 
-today = datetime.now()
+TODAY = datetime.now()
 
 
 def _handle_metar_code(code: str):
@@ -16,11 +16,11 @@ def _handle_metar_code(code: str):
     return date, metar
 
 
-def parse_metars_from_file(station: str, start_year=2005, end_year=today.year):
-    main_path = os.getcwd()
+def parse_metars_from_file(station: str, start_year=2005, end_year=TODAY.year):
+    main_path = os.path.dirname(__file__)
 
     for year in range(start_year, end_year):
-        path = main_path + f"/metar_forecast/data/{station}/{year}.txt"
+        path = main_path + f"/data/{station}/{year}.txt"
         lines = open(path, "r").readlines()
         message = f"{station}: {year}..."
         for n in track(range(len(lines)), description=message):
@@ -35,3 +35,21 @@ def parse_metars_from_file(station: str, start_year=2005, end_year=today.year):
                 error = 1
                 exit()
             yield metar
+
+
+def write_csv(station: str, start_year=2005, end_year=TODAY.year):
+    main_path = os.path.dirname(__file__)
+    csv = open(main_path + f"/data/{station}/data.csv", "w")
+
+    count = 0
+    for metar in parse_metars_from_file(
+        station, start_year=start_year, end_year=end_year
+    ):
+        d = metar.to_dict()
+        if count == 0:
+            csv.write(",".join(header.capitalize() for header in d.keys()))
+            csv.write("\n")
+        count += 1
+        csv.write(",".join(str(value) for value in d.values()))
+        csv.write("\n")
+        yield list(metar.to_dict().keys())

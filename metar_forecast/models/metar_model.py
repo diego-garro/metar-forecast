@@ -16,15 +16,16 @@ class Metar(METAR.Metar):
             self.cavok = Metar.null
 
     def _verify_cavok(self):
-        if self.vis.value() < 10000.0:
+        if self.vis is not None and self.vis.value() < 10000.0:
             self.cavok = 0
 
         if len(self.weather) > 0:
             self.cavok = 0
 
         if len(self.sky) > 0:
-            height = self.sky[0][1].value()
-            if height < 6000.0:
+            height = self.sky[0][1]
+            cover = self.sky[0][0]
+            if cover == "VV" or (height != None and height.value() < 6000.0):
                 self.cavok = 0
 
     def get_wind_dir(self):
@@ -110,8 +111,8 @@ class Metar(METAR.Metar):
             elif parameter == "cloud":
                 cloud = self.sky[index][2]
                 return cloud if cloud is not None else Metar.null
-            else:
-                return Metar.null
+        else:
+            return Metar.null
 
     def get_temperature(self, type="absolute"):
         """Returns the absolute or dewpoint temperature or null.
@@ -131,7 +132,7 @@ class Metar(METAR.Metar):
     def get_pressure(self):
         return self.press.value() if self.press is not None else Metar.null
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         d = {
             "date": datetime.strftime(self.time, "%Y%m%d%H%M"),
             "year": str(self.time.year),
@@ -174,3 +175,4 @@ class Metar(METAR.Metar):
             "pressure": self.get_pressure(),
             "code": self.code.strip(),
         }
+        return d
