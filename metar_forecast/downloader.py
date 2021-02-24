@@ -124,7 +124,7 @@ def download_most_recent_metar(station_icao):
         res = res.text.split("\n")
         res = res[:2]
         metar = _handle_metar(res)
-        console.print("\n[green]{}".format(metar.string()))
+        console.print("\n{}".format(metar.string()), style='success')
     except Exception as error:
         console.print(f"\n\n{url}", style="info")
         console.print(f"Request Error: ", end="", style="danger")
