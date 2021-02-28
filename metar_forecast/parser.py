@@ -17,6 +17,16 @@ def _handle_metar_code(code: str):
 
 
 def parse_metars_from_file(station: str, start_year=2005, end_year=TODAY.year):
+    """Parse the codes of METAR reports to find coding errors.
+
+    Args:
+        station (str): ICAO station code.
+        start_year (int, optional): Start year of disponible data or begin of you want to parse. Defaults to 2005.
+        end_year (int, optional): End year of disponible data or until you want to parse. Defaults to TODAY.year.
+
+    Yields:
+        Metar: The METAR as a Metar object.
+    """
     main_path = os.path.dirname(__file__)
 
     for year in range(start_year, end_year):
@@ -38,6 +48,16 @@ def parse_metars_from_file(station: str, start_year=2005, end_year=TODAY.year):
 
 
 def write_csv(station: str, start_year=2005, end_year=TODAY.year):
+    """Writes the METAR objects to a CSV file in the same folder of the data.
+
+    Args:
+        station (str): ICAO station code.
+        start_year (int, optional): Start year of disponible data or begin of you want to write. Defaults to 2005.
+        end_year ([type], optional): End year of disponible data or until you want to write. Defaults to TODAY.year.
+
+    Yields:
+        list: 
+    """
     main_path = os.path.dirname(__file__)
     csv = open(main_path + f"/data/{station}/data.csv", "w")
 
@@ -52,4 +72,4 @@ def write_csv(station: str, start_year=2005, end_year=TODAY.year):
         count += 1
         csv.write(",".join(str(value) for value in d.values()))
         csv.write("\n")
-        yield list(metar.to_dict().keys())
+        yield list(d.keys())

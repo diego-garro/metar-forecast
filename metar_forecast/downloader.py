@@ -62,7 +62,17 @@ def _handle_metar(most_recent_metar):
     return Metar(date, most_recent_metar[1])
 
 
-def download_metars_by_year(station_icao, start_year=2005, end_year=TODAY.year):
+def download_metars_by_year(station_icao: str, start_year=2005, end_year=TODAY.year):
+    """Downloads the METAR data from Ogimet.com.
+
+    Args:
+        station_icao (str): ICAO station code.
+        start_year (int, optional): Start year to download data.. Defaults to 2005.
+        end_year (int, optional): End year to download data. Defaults to actual year.
+
+    Raises:
+        OgimetLimitError: Error raised by Ogimet.com when your requests much data in a few of time.
+    """
     remaining_time_to_request = 30
 
     for year in range(start_year, end_year):
@@ -117,6 +127,14 @@ def download_metars_by_year(station_icao, start_year=2005, end_year=TODAY.year):
 
 
 def download_most_recent_metar(station_icao):
+    """Downloads the most recent METAR from NOAA.
+
+    Args:
+        station_icao (str): ICAO station code.
+
+    Returns:
+        [list]: The response as a list of strings.
+    """
     url = f"http://tgftp.nws.noaa.gov/data/observations/metar/stations/{station_icao.upper()}.TXT"
     # print(url)
     try:
