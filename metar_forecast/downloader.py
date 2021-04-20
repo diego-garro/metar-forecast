@@ -27,8 +27,8 @@ class OgimetLimitError(Exception):
     This exception is raised when that message is detected.
     """
 
-    def __init__(self, message=OGIMET_LIMIT_MESAGE):
-        super().__init__(message)
+    def __init__(self):
+        super().__init__(OGIMET_LIMIT_MESAGE)
 
 
 def _join_line_separated_metars(metar_list):
@@ -142,7 +142,7 @@ def download_most_recent_metar(station_icao):
         res = res.text.split("\n")
         res = res[:2]
         metar = _handle_metar(res)
-        console.print("\n{}".format(metar.string()), style='success')
+        console.print("\n{}".format(metar.string()), style="success")
     except Exception as error:
         console.print(f"\n\n{url}", style="info")
         console.print(f"Request Error: ", end="", style="danger")

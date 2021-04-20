@@ -56,7 +56,7 @@ def write_csv(station: str, start_year=2005, end_year=TODAY.year):
         end_year ([type], optional): End year of disponible data or until you want to write. Defaults to TODAY.year.
 
     Yields:
-        list: 
+        list: The keys of metar.to_dict() as a list.
     """
     main_path = os.path.dirname(__file__)
     csv = open(main_path + f"/data/{station}/data.csv", "w")
