@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "metar-forecast"
+version = "0.1.0"
+description = ""
+authors = ["diego-garro <diego.garromolina@yahoo.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+get-metars = "^0.3.1"
+aeromet-py = "^0.1.2"
+fastapi = {extras = ["all"], version = "^0.85.0"}
+pandas = "^2.0.1"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^5.2"
+black = "^22.8.0"
+isort = "^5.10.1"
+mypy = "^0.982"
+codecov = "^2.1.12"
+coverage = "^6.5.0"
+bump2version = "^1.0.1"
+dvc = "^2.34.2"
+ipykernel = "^6.22.0"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
