@@ -1,0 +1,5 @@
+outs:
+- md5: 8dc3fb8198e3de39b5ad4a4edc8aed9a
+  size: 30288539
+  isexec: true
+  path: metars.csv
