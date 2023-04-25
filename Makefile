@@ -12,9 +12,9 @@ DVC=dvc
 DVC_GET=$(DVC) get
 DATA_REPO_URL=https://dagshub.com/diego-garro/metar-datasets
 
-SOURCE_FILES=$(shell find . -path "./aeromet_py/*.py")
+SOURCE_FILES=$(shell find . -path "./src/*.py")
 TEST_FILES=$(shell find . -path "./tests/**/*.py")
-SOURCES_FOLDER=aeromet_py
+SOURCES_FOLDER=src
 
 BRANCH := $(shell git rev-parse --abbrev-ref HEAD)
 
