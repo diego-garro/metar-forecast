@@ -10,7 +10,7 @@ APP=app
 
 DVC=dvc
 DVC_GET=$(DVC) get
-DATA_REPO_URL=https://dagshub.com/diego-garro/metar-datasets
+DATA_REPO_URL=https://dagshub.com/diego-garro/metar-forecast
 
 SOURCE_FILES=$(shell find . -path "./src/*.py")
 TEST_FILES=$(shell find . -path "./tests/**/*.py")
@@ -65,5 +65,4 @@ run:
 	$(POETRY_RUN) $(UVICORN) $(ENTRYPOINT):$(APP) --reload
 
 dvc-download:
-	rm -rf data/
-    $(DVC_GET) $(DATA_REPO_URL) metar_datasets/data/
+    $(DVC_GET) $(DATA_REPO_URL) data
