@@ -48,12 +48,12 @@ def get_data(station: str, metar_dt: datetime) -> pd.DataFrame:
 
     if plus7days.month != minus7days.month:
         data = data.query(
-            f"(index.dt.month == {minus7days.month} and index.dt.day >= {minus7days.day})"
+            f"(index.dt.month == {minus7days.month} and index.dt.day >= {minus7days.day}) "
             f"or (index.dt.month == {plus7days.month} and index.dt.day <= {plus7days.day})"
         )
     else:
         data = data.query(
-            f"(index.dt.month == {minus7days.month}"
+            f"index.dt.month == {minus7days.month} "
             f"and (index.dt.day >= {minus7days.day} and index.dt.day <= {plus7days.day})"
         )
 
@@ -195,8 +195,8 @@ def forecasting_values(
     return OrderedDict(data)
 
 
-def make_forecast(station: str):
-    metar = get_current_metar(station)
+async def make_forecast(station: str):
+    metar = await fetch_metar(station)
     metar_time = metar.time.time
     vars_dict = create_dict_of_variables(metar)
 
@@ -207,3 +207,7 @@ def make_forecast(station: str):
 
     json_obj = json.dumps(forecasts, indent=2)
     return json_obj
+
+
+if __name__ == "__main__":
+    asyncio.run(make_forecast("mroc"))

@@ -8,10 +8,12 @@ authors = ["diego-garro <diego.garromolina@yahoo.com>"]
 python = "^3.8"
 get-metars = "^0.3.1"
 aeromet-py = "^0.1.2"
-fastapi = {extras = ["all"], version = "^0.85.0"}
 pandas = "^2.0.1"
 aiohttp = "^3.8.4"
 strenum = "^0.4.10"
+rocketry = "^2.5.1"
+fastapi = "^0.100.0"
+uvicorn = "^0.22.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^5.2"
