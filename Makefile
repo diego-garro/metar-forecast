@@ -9,7 +9,7 @@ ENTRYPOINT=src.main
 APP=app
 
 DVC=dvc
-DVC_GET=$(DVC) get
+DVC_GET=$(DVC) get -f
 DATA_REPO_URL=https://dagshub.com/diego-garro/metar-forecast
 
 SOURCE_FILES=$(shell find . -path "./src/*.py")

@@ -96,9 +96,10 @@ def get_data_by_day_of_interest(
         df_of_interest = pd.concat(
             [
                 df_of_interest,
-                df.loc[str(day) : str(day + timedelta(hours=13))],
+                df.loc[str(day) : str(day + timedelta(hours=25))],
             ]
         )
+    print(df_of_interest.head(25))
     return df_of_interest
 
 
@@ -126,35 +127,35 @@ def create_dict_of_variables(metar: Metar) -> OrderedDict[str, NumericVariable]:
     return CllOrderedDict(
         [
             (
-                "direction",
+                "direction (°)",
                 NumericVariable(
                     column_name=ColumnName.WindDirection, doubt=20.0, value=direction
                 ),
             ),
             (
-                "speed",
+                "speed (kt)",
                 NumericVariable(
                     column_name=ColumnName.WindSpeed, doubt=4.0, value=speed
                 ),
             ),
             (
-                "gust",
+                "gust (kt)",
                 NumericVariable(column_name=ColumnName.WindGust, doubt=5.0, value=gust),
             ),
             (
-                "temperature",
+                "temperature (°C)",
                 NumericVariable(
                     column_name=ColumnName.Temperature, doubt=1.0, value=temp
                 ),
             ),
             (
-                "dewpoint",
+                "dewpoint (°C)",
                 NumericVariable(
                     column_name=ColumnName.Dewpoint, doubt=1.0, value=dewpt
                 ),
             ),
             (
-                "pressure",
+                "pressure (inHg)",
                 NumericVariable(
                     column_name=ColumnName.Pressure, doubt=0.02, value=press
                 ),
@@ -182,13 +183,17 @@ def forecasting_values(
     df: pd.DataFrame, var: NumericVariable, metar_date: datetime
 ) -> OrderedDict:
     days = get_days_of_interest(df, var, metar_date.hour)
-    data = get_data_by_day_of_interest(df, days)
+    df = get_data_by_day_of_interest(df, days)
+    print(df.head(5))
     data = []
-    for hours in range(1, 14):
+    for hours in range(1, 26):
         forecast_date = metar_date + timedelta(hours=hours)
-        forecast_df = df.query(f"index.dt.hour == {forecast_date.hour}")
-        # print(forecast_df.head(10))
-        mean = forecast_df[var.column_name].mean(skipna=True)
+        # print(forecast_df.index)
+        try:
+            forecast_df = df.query(f"index.dt.hour == {forecast_date.hour}")
+            mean = forecast_df[var.column_name].mean(skipna=True)
+        except AttributeError:
+            mean = 0.0
         data.append(
             (datetime.strftime(forecast_date, "%HZ"), rounded(var.column_name, mean))
         )
@@ -203,6 +208,7 @@ async def make_forecast(station: str):
     data = get_data(station, metar_time)
     forecasts = CllOrderedDict()
     for name, var in vars_dict.items():
+        print(station, name, var.column_name)
         forecasts[name] = forecasting_values(data, var, metar_time)
 
     json_obj = json.dumps(forecasts, indent=2)

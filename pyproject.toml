@@ -26,6 +26,7 @@ bump2version = "^1.0.1"
 dvc = "^2.34.2"
 ipykernel = "^6.22.0"
 dvc-s3 = "^2.22.0"
+dagshub = "^0.2.20"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

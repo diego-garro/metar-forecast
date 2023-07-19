@@ -23,6 +23,13 @@ async def forecast(station: str = Path(..., regex=r"mr[a-z][a-z]")):
     return FileResponse(file_path)
 
 
+@app.get("/{station}.txt")
+async def forecast(station: str = Path(..., regex=r"mr[a-z][a-z]")):
+    file_path = f"./data/txt/{station}.txt"
+
+    return FileResponse(file_path)
+
+
 if __name__ == "__main__":
     import uvicorn
 
