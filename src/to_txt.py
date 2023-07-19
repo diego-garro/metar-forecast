@@ -1,5 +1,5 @@
 import json
-from typing import Dict
+from typing import Dict, Any
 
 
 def read_json_file(station: str) -> Dict[str, Dict[str, str]]:
@@ -9,21 +9,51 @@ def read_json_file(station: str) -> Dict[str, Dict[str, str]]:
     return json_obj
 
 
-def to_txt(station: str) -> None:
-    json_obj = read_json_file(station)
-    txt = "Hour (UTC)".rjust(15)
-    keys = list(json_obj.keys())
-    for key in keys:
-        txt += key.capitalize().rjust(15)
+def header(json_obj: Dict[str, Any]) -> None:
+    dt = json_obj["datetime"]
+    station = json_obj["station"]
+    length = 141
 
-    hours = list(json_obj[keys[0]].keys())
+    txt = f"This model ran on {dt}.".center(length)
+    txt += (
+        "\n"
+        + f"Hourly average of the variables of interest for the {station['name']} ({station['icao']}).".center(
+            length
+        )
+    )
+    txt += "\n" + (
+        "Model output using mean values ​​for QNH (inHg), "
+        "temperatures (°C), direction (°) and wind speed (kt)."
+    ).center(length)
+    # txt += "\n" + (
+    #     "Instituto Meteorológico Nacional (IMN), "
+    #     "Departamento de Meteorología Sinóptica y Aeronáutica (DMSA)."
+    # ).center(length)
+    txt += "\n" + "-" * 141
+    txt += "\n" + "-" * 141
+    txt += "\n"
+
+    return txt.upper()
+
+
+def to_txt(station: str) -> None:
+    lenght = 20
+    json_obj = read_json_file(station)
+    forecasts = json_obj["forecasts"]
+    txt = "Hour (UTC)".rjust(lenght)
+    keys = list(forecasts.keys())
+    for key in keys:
+        txt += key.rjust(lenght)
+
+    hours = list(forecasts[keys[0]].keys())
     for hour in hours:
-        txt += "\n" + hour.rjust(15)
+        txt += "\n" + hour.rjust(lenght)
         for key in keys:
-            data = json_obj[key][hour]
-            txt += data.rjust(15)
+            data = forecasts[key][hour]
+            txt += data.rjust(lenght)
 
     f = open(f"data/txt/{station}.txt", "w")
+    f.write(header(json_obj))
     f.write(txt)
     f.close()
 

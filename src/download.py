@@ -7,8 +7,10 @@ import aiohttp
 from aeromet_py import Metar
 
 
-async def fetch_metar(station: str):
-    url = f"http://tgftp.nws.noaa.gov/data/observations/metar/stations/{station.upper()}.TXT"
+async def fetch_metar(icao: str):
+    url = (
+        f"http://tgftp.nws.noaa.gov/data/observations/metar/stations/{icao.upper()}.TXT"
+    )
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             if response.status == 200:

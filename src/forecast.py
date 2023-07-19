@@ -15,15 +15,16 @@ from pydantic import BaseModel
 from strenum import SnakeCaseStrEnum
 
 from .download import fetch_metar
+from .station import Station
 
 
-def get_current_metar(station: str):
+def get_current_metar(icao: str):
     loop = asyncio.get_event_loop()
-    metar = loop.run_until_complete(fetch_metar(station))
+    metar = loop.run_until_complete(fetch_metar(icao))
     return metar
 
 
-def get_data(station: str, metar_dt: datetime) -> pd.DataFrame:
+def get_data(icao: str, metar_dt: datetime) -> pd.DataFrame:
     plus7days = metar_dt + timedelta(days=7)
     minus7days = metar_dt - timedelta(days=7)
 
@@ -42,7 +43,7 @@ def get_data(station: str, metar_dt: datetime) -> pd.DataFrame:
         "pressure",
     ]
     data = pd.read_csv(
-        f"./data/{station.lower()}/metars.csv", parse_dates=["date"], usecols=columns
+        f"./data/{icao.lower()}/metars.csv", parse_dates=["date"], usecols=columns
     )
     data = data.set_index(["date"])
 
@@ -99,7 +100,7 @@ def get_data_by_day_of_interest(
                 df.loc[str(day) : str(day + timedelta(hours=25))],
             ]
         )
-    print(df_of_interest.head(25))
+    # print(df_of_interest.head(25))
     return df_of_interest
 
 
@@ -127,35 +128,35 @@ def create_dict_of_variables(metar: Metar) -> OrderedDict[str, NumericVariable]:
     return CllOrderedDict(
         [
             (
-                "direction (°)",
+                "Direction (°)",
                 NumericVariable(
                     column_name=ColumnName.WindDirection, doubt=20.0, value=direction
                 ),
             ),
             (
-                "speed (kt)",
+                "Speed (kt)",
                 NumericVariable(
                     column_name=ColumnName.WindSpeed, doubt=4.0, value=speed
                 ),
             ),
             (
-                "gust (kt)",
+                "Gust (kt)",
                 NumericVariable(column_name=ColumnName.WindGust, doubt=5.0, value=gust),
             ),
             (
-                "temperature (°C)",
+                "Temperature (°C)",
                 NumericVariable(
                     column_name=ColumnName.Temperature, doubt=1.0, value=temp
                 ),
             ),
             (
-                "dewpoint (°C)",
+                "Dewpoint (°C)",
                 NumericVariable(
                     column_name=ColumnName.Dewpoint, doubt=1.0, value=dewpt
                 ),
             ),
             (
-                "pressure (inHg)",
+                "Pressure (inHg)",
                 NumericVariable(
                     column_name=ColumnName.Pressure, doubt=0.02, value=press
                 ),
@@ -184,7 +185,7 @@ def forecasting_values(
 ) -> OrderedDict:
     days = get_days_of_interest(df, var, metar_date.hour)
     df = get_data_by_day_of_interest(df, days)
-    print(df.head(5))
+    # print(df.head(5))
     data = []
     for hours in range(1, 26):
         forecast_date = metar_date + timedelta(hours=hours)
@@ -200,18 +201,23 @@ def forecasting_values(
     return OrderedDict(data)
 
 
-async def make_forecast(station: str):
-    metar = await fetch_metar(station)
+async def make_forecast(station: Station):
+    metar = await fetch_metar(station.icao)
     metar_time = metar.time.time
     vars_dict = create_dict_of_variables(metar)
 
-    data = get_data(station, metar_time)
+    data = get_data(station.icao, metar_time)
     forecasts = CllOrderedDict()
     for name, var in vars_dict.items():
-        print(station, name, var.column_name)
+        # print(station, name, var.column_name)
         forecasts[name] = forecasting_values(data, var, metar_time)
 
-    json_obj = json.dumps(forecasts, indent=2)
+    d = {
+        "datetime": str(datetime.utcnow().strftime("%Y/%m/%d %H:%M")),
+        "station": station.dict(),
+        "forecasts": forecasts,
+    }
+    json_obj = json.dumps(d, indent=2)
     return json_obj
 
 
