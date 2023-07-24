@@ -1,3 +1,5 @@
+PYTHON=python -m
+
 POETRY=poetry
 POETRY_RUN=$(POETRY) run
 
@@ -62,7 +64,7 @@ codecov:
 	$(POETRY_RUN) codecov
 
 run:
-	$(POETRY_RUN) $(UVICORN) $(ENTRYPOINT):$(APP) --reload
+	$(POETRY_RUN) $(PYTHON) $(SOURCES_FOLDER)
 
 dvc-download:
     $(DVC_GET) $(DATA_REPO_URL) data
