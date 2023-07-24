@@ -1,10 +1,11 @@
 from rocketry import Rocketry
 from rocketry.conds import daily
+from rocketry.exc import TaskTerminationException
 
 from .forecast import make_forecast
 from .tojson import to_json
 from .to_txt import to_txt
-from .station import Stations, Station
+from .station import Stations
 
 
 # Creating the Rocketry app
@@ -26,42 +27,45 @@ today = datetime.now()
 def dt2hmstr(dt: datetime) -> str:
     return dt.strftime("%H:%M")
 
+stations = Stations()
+
 
 # Creating some tasks
 # @app.task(f"time of day between {dt2hmstr(today)} and {dt2hmstr(todayplus1min)}")
 @app.task(daily.at(dt2hmstr(today)))
 async def forecasts_at_XXz():
-    await forecasts(Stations())
+    await forecasts(stations)
+    raise TaskTerminationException()
     ...
 
 
 @app.task(daily.at("06:10"))
 async def forecasts_at_12z():
-    await forecasts(Stations()[1:])
+    await forecasts(stations[1:])
     ...
 
 
 @app.task(daily.at("05:10"))
 async def forecasts_at_11z():
-    await forecasts(Stations()[0])
+    await forecasts([stations.mroc])
     ...
 
 
 @app.task(daily.at("11:10"))
 async def forecasts_at_17z():
-    await forecasts(Stations()[0:2])
+    await forecasts(stations[0:2])
     ...
 
 
 @app.task(daily.at("17:10"))
 async def forecasts_at_23z():
-    await forecasts(Stations()[0])
+    await forecasts([stations.mroc, stations.mrlb])
     ...
 
 
 @app.task(daily.at("23:10"))
 async def forecasts_at_05z():
-    await forecasts(Stations()[0])
+    await forecasts([stations.mroc])
     ...
 
 
