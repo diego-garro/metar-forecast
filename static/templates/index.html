@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Metar Forecast</title>
+    <link
+      href="{{ url_for('static', path='css/styles.css') }}"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <h1>Forecasted METAR conditions for Costa Rican's Airports</h1>
+    <h3>Available stations:</h3>
+    <ul>
+      <li>
+        <a target="_blank" href="http://127.0.0.1:8000/mroc.txt">MROC</a>
+      </li>
+      <li>
+        <a target="_blank" href="http://127.0.0.1:8000/mrpv.txt">MRPV</a>
+      </li>
+      <li>
+        <a target="_blank" href="http://127.0.0.1:8000/mrlb.txt">MRLB</a>
+      </li>
+      <li>
+        <a target="_blank" href="http://127.0.0.1:8000/mrlm.txt">MRLM</a>
+      </li>
+    </ul>
+  </body>
+</html>
