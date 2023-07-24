@@ -17,12 +17,12 @@ def header(json_obj: Dict[str, Any]) -> None:
     txt = f"This model ran on {dt}.".center(length)
     txt += (
         "\n"
-        + f"Hourly average of the variables of interest for the {station['name']} ({station['icao']}).".center(
+        + f"Hourly average of variables of interest for {station['name']} ({station['icao']}).".center(
             length
         )
     )
     txt += "\n" + (
-        "Model output using mean values ​​for QNH (inHg), "
+        "Model output using mean values for QNH (inHg), "
         "temperatures (°C), direction (°) and wind speed (kt)."
     ).center(length)
     # txt += "\n" + (
