@@ -34,7 +34,7 @@ tr {
 }
 
 tr.bg-grey {
-  background-color: rgb(177, 173, 173);
+  background-color: rgb(103, 141, 224);
 }
 
 th.forecast {
@@ -50,7 +50,7 @@ th.forecast {
 }
 
 td.forecast {
-  border: rgb(177, 173, 173) 2px solid;
+  border: rgb(103, 141, 224) 2px solid;
   border-radius: 5px;
   padding: 0.2rem;
   margin: 0.5rem;

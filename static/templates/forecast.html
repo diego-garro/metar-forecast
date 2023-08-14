@@ -36,13 +36,13 @@
       {% else %}
         <tr class="bg-grey">
       {% endif %}
-        <td class="forecast">{{ times[index] }}</td>
-        <td class="forecast">{{ forecasts["Direction (°)"][times[index]] | replace("NaN", "No data") }}</td>
-        <td class="forecast">{{ forecasts["Speed (kt)"][times[index]] | replace("NaN", "No data") }}</td>
-        <td class="forecast">{{ forecasts["Gust (kt)"][times[index]] | replace("NaN", "No data") }}</td>
-        <td class="forecast">{{ forecasts["Temperature (°C)"][times[index]] | replace("NaN", "No data") }}</td>
-        <td class="forecast">{{ forecasts["Dewpoint (°C)"][times[index]] | replace("NaN", "No data") }}</td>
-        <td class="forecast">{{ forecasts["Pressure (inHg)"][times[index]] | replace("NaN", "No data") }}</td>
+        <td class="forecast"><b>{{ times[index] }}</b></td>
+        <td class="forecast"><b>{{ forecasts["Direction (°)"][times[index]] | replace("NaN", "No data") }}</b></td>
+        <td class="forecast"><b>{{ forecasts["Speed (kt)"][times[index]] | replace("NaN", "No data") }}</b></td>
+        <td class="forecast"><b>{{ forecasts["Gust (kt)"][times[index]] | replace("NaN", "No data") }}</b></td>
+        <td class="forecast"><b>{{ forecasts["Temperature (°C)"][times[index]] | replace("NaN", "No data") }}</b></td>
+        <td class="forecast"><b>{{ forecasts["Dewpoint (°C)"][times[index]] | replace("NaN", "No data") }}</b></td>
+        <td class="forecast"><b>{{ forecasts["Pressure (inHg)"][times[index]] | replace("NaN", "No data") }}</b></td>
       </tr>
     {% endfor %}
   </table>
