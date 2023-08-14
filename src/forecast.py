@@ -194,7 +194,7 @@ def forecasting_values(
             forecast_df = df.query(f"index.dt.hour == {forecast_date.hour}")
             mean = forecast_df[var.column_name].mean(skipna=True)
         except AttributeError:
-            mean = 0.0
+            mean = np.nan
         data.append(
             (datetime.strftime(forecast_date, "%HZ"), rounded(var.column_name, mean))
         )
@@ -213,8 +213,10 @@ async def make_forecast(station: Station):
         forecasts[name] = forecasting_values(data, var, metar_time)
 
     d = {
-        "datetime": str(datetime.utcnow().strftime("%Y/%m/%d %H:%M")),
+        "datetime": str(datetime.utcnow().strftime("%Y/%m/%d %H:%MZ")),
         "station": station.dict(),
+        "predictor": metar.raw_code,
+        "times": list(forecasts["Speed (kt)"].keys()),
         "forecasts": forecasts,
     }
     json_obj = json.dumps(d, indent=2)

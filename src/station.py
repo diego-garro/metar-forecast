@@ -37,6 +37,10 @@ class Stations:
     def __len__(self):
         return len(self._list)
 
+    @property
+    def items(self) -> List[Station]:
+        return self._list
+
 
 if __name__ == "__main__":
     stations = Stations()

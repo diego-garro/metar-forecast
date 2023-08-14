@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ station.name }} Forecast</title>
+    <link
+      href="{{ url_for('static', path='css/styles.css') }}"
+      rel="stylesheet"
+      type="text/css"
+    />
+</head>
+<body>
+  <div>
+    <p>Station: {{ station.name }} ({{ station.icao | upper }})</p>
+  </div>
+  <div>
+    <p>Forecast issued at: {{ datetime }}</p>
+  </div>
+  <div>
+    <p>Observation (METAR) used as predictor: <em>{{ predictor }}</em></p>
+  </div>
+  <table class="center" id="forecast">
+    <tr class="tb-head">
+      <th class="forecast">Hour (UTC)</th>
+      <th class="forecast">Wind Direction (°)</th>
+      <th class="forecast">Wind Speed (kt)</th>
+      <th class="forecast">Wind Gust (kt)</th>
+      <th class="forecast">Temperature (°C)</th>
+      <th class="forecast">Dewpoint (°C)</th>
+      <th class="forecast">QNH (inHg)</th>
+    </tr>
+    {% for index in range( times | length ) %}
+      {% if index % 2 == 0 %}
+        <tr>
+      {% else %}
+        <tr class="bg-grey">
+      {% endif %}
+        <td class="forecast">{{ times[index] }}</td>
+        <td class="forecast">{{ forecasts["Direction (°)"][times[index]] | replace("NaN", "No data") }}</td>
+        <td class="forecast">{{ forecasts["Speed (kt)"][times[index]] | replace("NaN", "No data") }}</td>
+        <td class="forecast">{{ forecasts["Gust (kt)"][times[index]] | replace("NaN", "No data") }}</td>
+        <td class="forecast">{{ forecasts["Temperature (°C)"][times[index]] | replace("NaN", "No data") }}</td>
+        <td class="forecast">{{ forecasts["Dewpoint (°C)"][times[index]] | replace("NaN", "No data") }}</td>
+        <td class="forecast">{{ forecasts["Pressure (inHg)"][times[index]] | replace("NaN", "No data") }}</td>
+      </tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
