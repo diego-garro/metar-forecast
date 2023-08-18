@@ -1,6 +1,8 @@
+import os
+from datetime import datetime
+
 from rocketry import Rocketry
-from rocketry.conds import daily
-from rocketry.exc import TaskTerminationException
+from rocketry.conds import daily, failed
 
 from .forecast import make_forecast
 from .tojson import to_json
@@ -19,23 +21,27 @@ async def forecasts(stations: Stations):
         to_txt(station.icao)
 
 
-from datetime import datetime
-
 today = datetime.now()
 
 
 def dt2hmstr(dt: datetime) -> str:
     return dt.strftime("%H:%M")
 
+
 stations = Stations()
 
 
+@app.cond()
+def are_there_forecasts():
+    if len(os.listdir("./data/json")) < 5:
+        return False
+    return True
+
+
 # Creating some tasks
-# @app.task(f"time of day between {dt2hmstr(today)} and {dt2hmstr(todayplus1min)}")
-@app.task(daily.at(dt2hmstr(today)))
+@app.task(daily.at(dt2hmstr(today)) & ~are_there_forecasts)
 async def forecasts_at_XXz():
     await forecasts(stations)
-    raise TaskTerminationException()
     ...
 
 
@@ -53,7 +59,7 @@ async def forecasts_at_11z():
 
 @app.task(daily.at("11:10"))
 async def forecasts_at_17z():
-    await forecasts(stations[0:2])
+    await forecasts(stations[:])
     ...
 
 
