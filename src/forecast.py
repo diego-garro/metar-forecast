@@ -84,8 +84,6 @@ def get_days_of_interest(
         f"{var.column_name} >= {var.value - var.doubt}"
         f" and {var.column_name} <= {var.value + var.doubt}"
     )
-    # print(df.index.to_list())
-    # print([date + timedelta(hours=12) for date in df.index.to_list()])
     return df.index.to_list()
 
 
@@ -100,7 +98,6 @@ def get_data_by_day_of_interest(
                 df.loc[str(day) : str(day + timedelta(hours=25))],
             ]
         )
-    # print(df_of_interest.head(25))
     return df_of_interest
 
 
@@ -185,14 +182,19 @@ def forecasting_values(
 ) -> OrderedDict:
     days = get_days_of_interest(df, var, metar_date.hour)
     df = get_data_by_day_of_interest(df, days)
-    # print(df.head(5))
     data = []
     for hours in range(1, 26):
         forecast_date = metar_date + timedelta(hours=hours)
-        # print(forecast_df.index)
         try:
             forecast_df = df.query(f"index.dt.hour == {forecast_date.hour}")
-            mean = forecast_df[var.column_name].mean(skipna=True)
+            column = forecast_df[var.column_name]
+            mean = column.mean(skipna=True)
+            if var.column_name == ColumnName.WindGust:
+                val_count = column.count()
+                length = len(column)
+                percent = val_count / length
+                if percent < 0.5:
+                    mean = np.nan
         except AttributeError:
             mean = np.nan
         data.append(
@@ -209,7 +211,6 @@ async def make_forecast(station: Station):
     data = get_data(station.icao, metar_time)
     forecasts = CllOrderedDict()
     for name, var in vars_dict.items():
-        # print(station, name, var.column_name)
         forecasts[name] = forecasting_values(data, var, metar_time)
 
     d = {
