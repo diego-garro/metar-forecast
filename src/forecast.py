@@ -30,17 +30,12 @@ def get_data(icao: str, metar_dt: datetime) -> pd.DataFrame:
 
     columns = [
         "date",
-        "year",
-        "month",
-        "day",
-        "hour",
-        "minute",
-        "wind_direction",
-        "wind_speed",
-        "wind_gust",
-        "temperature",
-        "dewpoint",
-        "pressure",
+        "wind_dir_deg",
+        "wind_speed_kt",
+        "wind_gust_kt",
+        "temp_c",
+        "dewpoint_c",
+        "pressure_inhg",
     ]
     data = pd.read_csv(
         f"./data/{icao.lower()}/metars.csv", parse_dates=["date"], usecols=columns
@@ -62,12 +57,12 @@ def get_data(icao: str, metar_dt: datetime) -> pd.DataFrame:
 
 
 class ColumnName(SnakeCaseStrEnum):
-    WindDirection = auto()
-    WindSpeed = auto()
-    WindGust = auto()
-    Temperature = auto()
-    Dewpoint = auto()
-    Pressure = auto()
+    WindDirDeg = auto()
+    WindSpeedKt = auto()
+    WindGustKt = auto()
+    TempC = auto()
+    DewpointC = auto()
+    PressureInhg = auto()
 
 
 class NumericVariable(BaseModel):
@@ -127,35 +122,35 @@ def create_dict_of_variables(metar: Metar) -> OrderedDict[str, NumericVariable]:
             (
                 "Direction (°)",
                 NumericVariable(
-                    column_name=ColumnName.WindDirection, doubt=20.0, value=direction
+                    column_name=ColumnName.WindDirDeg, doubt=20.0, value=direction
                 ),
             ),
             (
                 "Speed (kt)",
                 NumericVariable(
-                    column_name=ColumnName.WindSpeed, doubt=4.0, value=speed
+                    column_name=ColumnName.WindSpeedKt, doubt=4.0, value=speed
                 ),
             ),
             (
                 "Gust (kt)",
-                NumericVariable(column_name=ColumnName.WindGust, doubt=5.0, value=gust),
+                NumericVariable(
+                    column_name=ColumnName.WindGustKt, doubt=5.0, value=gust
+                ),
             ),
             (
                 "Temperature (°C)",
-                NumericVariable(
-                    column_name=ColumnName.Temperature, doubt=1.0, value=temp
-                ),
+                NumericVariable(column_name=ColumnName.TempC, doubt=1.0, value=temp),
             ),
             (
                 "Dewpoint (°C)",
                 NumericVariable(
-                    column_name=ColumnName.Dewpoint, doubt=1.0, value=dewpt
+                    column_name=ColumnName.DewpointC, doubt=1.0, value=dewpt
                 ),
             ),
             (
                 "Pressure (inHg)",
                 NumericVariable(
-                    column_name=ColumnName.Pressure, doubt=0.02, value=press
+                    column_name=ColumnName.PressureInhg, doubt=0.02, value=press
                 ),
             ),
         ]
@@ -166,12 +161,12 @@ def rounded(var_name: str, value: float) -> str:
     if value is np.nan:
         return "NaN"
 
-    if var_name == ColumnName.WindDirection:
+    if var_name == ColumnName.WindDirDeg:
         value = round(value / 10) * 10
         return f"{value}"
-    elif var_name in [ColumnName.WindSpeed, ColumnName.WindGust]:
+    elif var_name in [ColumnName.WindSpeedKt, ColumnName.WindGustKt]:
         return f"{value:.0f}"
-    elif var_name in [ColumnName.Temperature, ColumnName.Dewpoint]:
+    elif var_name in [ColumnName.TempC, ColumnName.DewpointC]:
         return f"{value:.1f}"
     else:
         return f"{value:.2f}"
@@ -189,10 +184,13 @@ def forecasting_values(
             forecast_df = df.query(f"index.dt.hour == {forecast_date.hour}")
             column = forecast_df[var.column_name]
             mean = column.mean(skipna=True)
-            if var.column_name == ColumnName.WindGust:
+            if var.column_name == ColumnName.WindGustKt:
                 val_count = column.count()
                 length = len(column)
-                percent = val_count / length
+                if length > 0:
+                    percent = val_count / length
+                else:
+                    percent = np.nan
                 if percent < 0.5:
                     mean = np.nan
         except AttributeError:
