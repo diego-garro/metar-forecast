@@ -12,7 +12,7 @@ def read_json_file(station: str) -> Dict[str, Dict[str, str]]:
 def header(json_obj: Dict[str, Any]) -> None:
     dt = json_obj["datetime"]
     station = json_obj["station"]
-    length = 141
+    length = 223
 
     txt = f"This model ran on {dt}.".center(length)
     txt += (
@@ -29,20 +29,21 @@ def header(json_obj: Dict[str, Any]) -> None:
     #     "Instituto Meteorológico Nacional (IMN), "
     #     "Departamento de Meteorología Sinóptica y Aeronáutica (DMSA)."
     # ).center(length)
-    txt += "\n" + "-" * 141
-    txt += "\n" + "-" * 141
+    txt += "\n" + "-" * length
+    txt += "\n" + "-" * length
     txt += "\n"
 
     return txt.upper()
 
 
 def to_txt(station: str) -> None:
-    lenght = 20
+    lenght = 23
     json_obj = read_json_file(station)
     forecasts = json_obj["forecasts"]
     txt = "Hour (UTC)".rjust(lenght)
     keys = list(forecasts.keys())
     for key in keys:
+        key = key.replace("Prob. ", "")
         txt += key.rjust(lenght)
 
     hours = list(forecasts[keys[0]].keys())

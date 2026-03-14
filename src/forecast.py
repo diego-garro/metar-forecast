@@ -24,6 +24,48 @@ def get_current_metar(icao: str):
     return metar
 
 
+def add_precipitation_column(df: pd.DataFrame) -> pd.DataFrame:
+    df["precipitation"] = 0
+    df.loc[
+        df["weather_1"].astype(str).str.contains("RA|DZ", regex=True), "precipitation"
+    ] = 1
+    df.loc[
+        df["weather_2"].astype(str).str.contains("RA|DZ", regex=True), "precipitation"
+    ] = 1
+    df.loc[
+        df["weather_3"].astype(str).str.contains("RA|DZ", regex=True), "precipitation"
+    ] = 1
+    return df
+
+
+def add_obscuration_column(df: pd.DataFrame) -> pd.DataFrame:
+    df["obscuration"] = 0
+    df.loc[df["weather_1"].astype(str).str.match("BR|FG|BCFG"), "obscuration"] = 1
+    df.loc[df["weather_2"].astype(str).str.match("BR|FG|BCFG"), "obscuration"] = 1
+    df.loc[df["weather_3"].astype(str).str.match("BR|FG|BCFG"), "obscuration"] = 1
+    return df
+
+
+def add_thunderstorm_column(df: pd.DataFrame) -> pd.DataFrame:
+    df["thunderstorm"] = 0
+    df.loc[
+        df["weather_1"].astype(str).str.match(r"(\+|-)?(TS|TSRA)"), "thunderstorm"
+    ] = 1
+    df.loc[
+        df["weather_2"].astype(str).str.match(r"(\+|-)?(TS|TSRA)"), "thunderstorm"
+    ] = 1
+    df.loc[
+        df["weather_3"].astype(str).str.match(r"(\+|-)?(TS|TSRA)"), "thunderstorm"
+    ] = 1
+    return df
+
+
+def add_visibility_column(df: pd.DataFrame) -> pd.DataFrame:
+    df["limited_visibility"] = 0
+    df.loc[df["visibility_m"].astype(float) < 5000.0, "limited_visibility"] = 1
+    return df
+
+
 def get_data(icao: str, metar_dt: datetime) -> pd.DataFrame:
     plus7days = metar_dt + timedelta(days=7)
     minus7days = metar_dt - timedelta(days=7)
@@ -33,6 +75,10 @@ def get_data(icao: str, metar_dt: datetime) -> pd.DataFrame:
         "wind_dir_deg",
         "wind_speed_kt",
         "wind_gust_kt",
+        "visibility_m",
+        "weather_1",
+        "weather_2",
+        "weather_3",
         "temp_c",
         "dewpoint_c",
         "pressure_inhg",
@@ -53,6 +99,11 @@ def get_data(icao: str, metar_dt: datetime) -> pd.DataFrame:
             f"and (index.dt.day >= {minus7days.day} and index.dt.day <= {plus7days.day})"
         )
 
+    data = add_precipitation_column(data)
+    data = add_obscuration_column(data)
+    data = add_thunderstorm_column(data)
+    data = add_visibility_column(data)
+
     return data
 
 
@@ -63,6 +114,10 @@ class ColumnName(SnakeCaseStrEnum):
     TempC = auto()
     DewpointC = auto()
     PressureInhg = auto()
+    Precipitation = auto()
+    Obscuration = auto()
+    Thunderstorm = auto()
+    LimitedVisibility = auto()
 
 
 class NumericVariable(BaseModel):
@@ -72,13 +127,16 @@ class NumericVariable(BaseModel):
 
 
 def get_days_of_interest(
-    df: pd.DataFrame, var: NumericVariable, metar_hour: int
+    df: pd.DataFrame, vars: List[NumericVariable], metar_hour: int
 ) -> List[pd.Timestamp]:
     df = df.query(f"index.dt.hour == {metar_hour}")
-    df = df.query(
-        f"{var.column_name} >= {var.value - var.doubt}"
-        f" and {var.column_name} <= {var.value + var.doubt}"
-    )
+    if len(vars) > 1:
+        vars = vars[1:]
+    for var in vars:
+        df = df.query(
+            f"{var.column_name} >= {var.value - var.doubt}"
+            f" and {var.column_name} <= {var.value + var.doubt}"
+        )
     return df.index.to_list()
 
 
@@ -96,7 +154,7 @@ def get_data_by_day_of_interest(
     return df_of_interest
 
 
-def create_dict_of_variables(metar: Metar) -> OrderedDict[str, NumericVariable]:
+def create_dict_of_variables(metar: Metar) -> OrderedDict[str, List[NumericVariable]]:
     direction = (
         metar.wind.direction_in_degrees
         if metar.wind.direction_in_degrees is not None
@@ -121,37 +179,113 @@ def create_dict_of_variables(metar: Metar) -> OrderedDict[str, NumericVariable]:
         [
             (
                 "Direction (°)",
-                NumericVariable(
-                    column_name=ColumnName.WindDirDeg, doubt=20.0, value=direction
-                ),
+                [
+                    NumericVariable(
+                        column_name=ColumnName.WindDirDeg, doubt=20.0, value=direction
+                    ),
+                ],
             ),
             (
                 "Speed (kt)",
-                NumericVariable(
-                    column_name=ColumnName.WindSpeedKt, doubt=4.0, value=speed
-                ),
+                [
+                    NumericVariable(
+                        column_name=ColumnName.WindSpeedKt, doubt=4.0, value=speed
+                    ),
+                ],
             ),
             (
                 "Gust (kt)",
-                NumericVariable(
-                    column_name=ColumnName.WindGustKt, doubt=5.0, value=gust
-                ),
+                [
+                    NumericVariable(
+                        column_name=ColumnName.WindGustKt, doubt=5.0, value=gust
+                    ),
+                ],
             ),
             (
                 "Temperature (°C)",
-                NumericVariable(column_name=ColumnName.TempC, doubt=1.0, value=temp),
+                [
+                    NumericVariable(
+                        column_name=ColumnName.TempC, doubt=1.0, value=temp
+                    ),
+                ],
             ),
             (
                 "Dewpoint (°C)",
-                NumericVariable(
-                    column_name=ColumnName.DewpointC, doubt=1.0, value=dewpt
-                ),
+                [
+                    NumericVariable(
+                        column_name=ColumnName.DewpointC, doubt=1.0, value=dewpt
+                    ),
+                ],
             ),
             (
                 "Pressure (inHg)",
-                NumericVariable(
-                    column_name=ColumnName.PressureInhg, doubt=0.02, value=press
-                ),
+                [
+                    NumericVariable(
+                        column_name=ColumnName.PressureInhg, doubt=0.02, value=press
+                    ),
+                ],
+            ),
+            (
+                "Precipitation Prob. (%)",
+                [
+                    NumericVariable(
+                        column_name=ColumnName.Precipitation, doubt=0.0, value=None
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.WindDirDeg, doubt=30.0, value=direction
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.DewpointC, doubt=2.0, value=dewpt
+                    ),
+                ],
+            ),
+            (
+                "Obscuration Prob. (%)",
+                [
+                    NumericVariable(
+                        column_name=ColumnName.Obscuration, doubt=0.0, value=None
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.WindDirDeg, doubt=30.0, value=direction
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.WindSpeedKt, doubt=5.0, value=speed
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.DewpointC, doubt=2.0, value=dewpt
+                    ),
+                ],
+            ),
+            (
+                "Thunderstorm Prob. (%)",
+                [
+                    NumericVariable(
+                        column_name=ColumnName.Thunderstorm, doubt=0.0, value=None
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.WindDirDeg, doubt=30.0, value=direction
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.TempC, doubt=2.0, value=temp
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.DewpointC, doubt=2.0, value=dewpt
+                    ),
+                ],
+            ),
+            (
+                "Limited Visibility Prob. (%)",
+                [
+                    NumericVariable(
+                        column_name=ColumnName.LimitedVisibility, doubt=0.0, value=None
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.WindDirDeg, doubt=30.0, value=direction
+                    ),
+                    NumericVariable(
+                        column_name=ColumnName.WindSpeedKt, doubt=5.0, value=speed
+                    ),
+                ],
             ),
         ]
     )
@@ -164,7 +298,14 @@ def rounded(var_name: str, value: float) -> str:
     if var_name == ColumnName.WindDirDeg:
         value = round(value / 10) * 10
         return f"{value}"
-    elif var_name in [ColumnName.WindSpeedKt, ColumnName.WindGustKt]:
+    elif var_name in [
+        ColumnName.WindSpeedKt,
+        ColumnName.WindGustKt,
+        ColumnName.Precipitation,
+        ColumnName.Obscuration,
+        ColumnName.Thunderstorm,
+        ColumnName.LimitedVisibility,
+    ]:
         return f"{value:.0f}"
     elif var_name in [ColumnName.TempC, ColumnName.DewpointC]:
         return f"{value:.1f}"
@@ -173,13 +314,14 @@ def rounded(var_name: str, value: float) -> str:
 
 
 def forecasting_values(
-    df: pd.DataFrame, var: NumericVariable, metar_date: datetime
+    df: pd.DataFrame, vars: List[NumericVariable], metar_date: datetime
 ) -> OrderedDict:
-    days = get_days_of_interest(df, var, metar_date.hour)
+    days = get_days_of_interest(df, vars, metar_date.hour)
     df = get_data_by_day_of_interest(df, days)
     data = []
     for hours in range(1, 26):
         forecast_date = metar_date + timedelta(hours=hours)
+        var = vars[0]
         try:
             forecast_df = df.query(f"index.dt.hour == {forecast_date.hour}")
             column = forecast_df[var.column_name]
@@ -193,6 +335,8 @@ def forecasting_values(
                     percent = np.nan
                 if percent < 0.5:
                     mean = np.nan
+            if len(vars) > 1 and mean != np.nan:
+                mean = mean * 100
         except AttributeError:
             mean = np.nan
         data.append(
@@ -208,8 +352,8 @@ async def make_forecast(station: Station):
 
     data = get_data(station.icao, metar_time)
     forecasts = CllOrderedDict()
-    for name, var in vars_dict.items():
-        forecasts[name] = forecasting_values(data, var, metar_time)
+    for name, vars in vars_dict.items():
+        forecasts[name] = forecasting_values(data, vars, metar_time)
 
     d = {
         "datetime": str(datetime.utcnow().strftime("%Y/%m/%d %H:%MZ")),

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ station.name }} Forecast</title>
+    <title>{{ station.name }} Probabilities Forecast</title>
     <link
       href="{{ url_for('static', path='css/styles.css') }}"
       rel="stylesheet"
@@ -23,12 +23,6 @@
   <table class="center" id="forecast">
     <tr class="tb-head">
       <th class="forecast">Hour (UTC)</th>
-      <th class="forecast">Wind Direction (°)</th>
-      <th class="forecast">Wind Speed (kt)</th>
-      <th class="forecast">Wind Gust (kt)</th>
-      <th class="forecast">Temperature (°C)</th>
-      <th class="forecast">Dewpoint (°C)</th>
-      <th class="forecast">QNH (inHg)</th>
       <th class="forecast">Precipitation Prob. (%)</th>
       <th class="forecast">Obscuration Prob. (%)</th>
       <th class="forecast">Thunderstorm Prob. (%)</th>
@@ -41,12 +35,6 @@
         <tr class="bg-grey">
       {% endif %}
         <td class="forecast"><b>{{ times[index] }}</b></td>
-        <td class="forecast"><b>{{ forecasts["Direction (°)"][times[index]] | replace("NaN", "No data") }}</b></td>
-        <td class="forecast"><b>{{ forecasts["Speed (kt)"][times[index]] | replace("NaN", "No data") }}</b></td>
-        <td class="forecast"><b>{{ forecasts["Gust (kt)"][times[index]] | replace("NaN", "No data") }}</b></td>
-        <td class="forecast"><b>{{ forecasts["Temperature (°C)"][times[index]] | replace("NaN", "No data") }}</b></td>
-        <td class="forecast"><b>{{ forecasts["Dewpoint (°C)"][times[index]] | replace("NaN", "No data") }}</b></td>
-        <td class="forecast"><b>{{ forecasts["Pressure (inHg)"][times[index]] | replace("NaN", "No data") }}</b></td>
         <td class="forecast"><b>{{ forecasts["Precipitation Prob. (%)"][times[index]] | replace("nan", "No data") }}</b></td>
         <td class="forecast"><b>{{ forecasts["Obscuration Prob. (%)"][times[index]] | replace("nan", "No data") }}</b></td>
         <td class="forecast"><b>{{ forecasts["Thunderstorm Prob. (%)"][times[index]] | replace("nan", "No data") }}</b></td>

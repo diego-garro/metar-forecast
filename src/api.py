@@ -35,6 +35,19 @@ async def html_response(
     return templates.TemplateResponse("forecast.html", context)
 
 
+@app.get("/prob_forecast/{station}", response_class=HTMLResponse)
+async def html_response(
+    request: Request, station: str = Path(..., regex=r"mr[a-z][a-z]")
+):
+    file_path = f"./data/json/{station}.json"
+    f = open(file_path)
+    json_obj = json.load(f)
+    context = {"request": request}
+    context.update(json_obj)
+
+    return templates.TemplateResponse("prob_forecast.html", context)
+
+
 @app.get("/{station}.json")
 async def json_response(station: str = Path(..., regex=r"mr[a-z][a-z]")):
     file_path = f"./data/json/{station}.json"
